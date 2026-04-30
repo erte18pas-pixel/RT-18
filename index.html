@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIM-RT 18 | Pelayanan Digital</title>
     
-    <!-- 3 BARIS BARU UNTUK PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d6efd">
     <link rel="apple-touch-icon" href="icon.png">
@@ -24,6 +23,45 @@
             border: none;
             display: block;
         }
+        /* Desain Spanduk Ajakan Instal */
+        #spanduk-instal {
+            display: none; /* Awalnya disembunyikan */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #0d6efd; /* Warna biru aplikasi */
+            color: white;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
+            z-index: 9999;
+            text-align: center;
+            font-family: sans-serif;
+        }
+        #spanduk-instal p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .tombol-instal {
+            background-color: white;
+            color: #0d6efd;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .tombol-tutup {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -31,13 +69,60 @@
     <!-- GANTI DENGAN LINK GOOGLE APPS SCRIPT BAPAK -->
     <iframe src="https://script.google.com/macros/s/AKfycbwQLwkItAlwZMYjDlQRz-XhRLwd58w7_Pad2qSyDybDFY2XSJiB3gmCGdj290tlNmV3cw/exec"></iframe>
 
-    <!-- SCRIPT BARU UNTUK MENGAKTIFKAN SERVICE WORKER -->
+    <!-- Kotak Spanduk Instalasi -->
+    <div id="spanduk-instal">
+        <p>Aplikasi SIM-RT 18 tersedia! Install di layar HP Anda agar lebih cepat & mudah diakses.</p>
+        <button id="btn-instal" class="tombol-instal">📲 Install Sekarang</button>
+        <button id="btn-tutup" class="tombol-tutup">Nanti Saja</button>
+    </div>
+
     <script>
+        // Mendaftarkan PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-            .then(() => console.log("Service Worker Terdaftar! Aplikasi siap diinstal."))
-            .catch((error) => console.log("Service Worker Gagal:", error));
+            navigator.serviceWorker.register('sw.js');
         }
+
+        // MESIN PENANGKAP INSTALASI
+        let penangkapInstal;
+        const spanduk = document.getElementById('spanduk-instal');
+        const btnInstal = document.getElementById('btn-instal');
+        const btnTutup = document.getElementById('btn-tutup');
+
+        // Saat browser mendeteksi aplikasi bisa diinstal
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Tahan pop-up bawaan browser
+            e.preventDefault();
+            // Simpan event-nya
+            penangkapInstal = e;
+            // Tampilkan spanduk buatan kita
+            spanduk.style.display = 'block';
+        });
+
+        // Saat tombol "Install Sekarang" ditekan warga
+        btnInstal.addEventListener('click', async () => {
+            // Sembunyikan spanduk kita
+            spanduk.style.display = 'none';
+            // Keluarkan pop-up instalasi asli dari browser
+            if (penangkapInstal) {
+                penangkapInstal.prompt();
+                const { outcome } = await penangkapInstal.userChoice;
+                // Jika warga setuju install, bersihkan mesinnya
+                if (outcome === 'accepted') {
+                    penangkapInstal = null;
+                }
+            }
+        });
+
+        // Jika warga menekan "Nanti Saja"
+        btnTutup.addEventListener('click', () => {
+            spanduk.style.display = 'none';
+        });
+
+        // Jika aplikasi sudah berhasil terinstal, sembunyikan spanduk selamanya
+        window.addEventListener('appinstalled', () => {
+            spanduk.style.display = 'none';
+            penangkapInstal = null;
+        });
     </script>
 </body>
 </html>
