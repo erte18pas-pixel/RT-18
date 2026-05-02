@@ -2,135 +2,162 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Mencegah user zoom-in agar terasa seperti aplikasi asli -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>APLIKASI RT 18 | Pelayanan Digital</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d6efd">
+    <meta name="theme-color" content="#f8fafc">
     <link rel="apple-touch-icon" href="icon.png">
 
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            background-color: #f4f6f9;
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            overflow: hidden; background-color: #f8fafc;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
+        
         iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
+            width: 100%; height: 100%; border: none; display: block;
         }
-        /* Desain Spanduk Ajakan Instal */
+
+        /* ==========================================
+           LAYAR PEMUAT (SPLASH SCREEN)
+           ========================================== */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff; z-index: 99999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        .logo-splash {
+            width: 80px; height: 80px; border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(13, 110, 253, 0.2);
+            animation: pulse 1.5s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 10px 25px rgba(13, 110, 253, 0.2); }
+            100% { transform: scale(1.05); box-shadow: 0 15px 35px rgba(13, 110, 253, 0.4); }
+        }
+        .teks-splash {
+            margin-top: 20px; font-weight: 800; color: #0f172a; font-size: 18px; letter-spacing: 0.5px;
+        }
+        .spinner {
+            margin-top: 15px; width: 30px; height: 30px; border: 3px solid #e2e8f0;
+            border-top: 3px solid #0d6efd; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ==========================================
+           SPANDUK INSTALASI (GLASSMORPHISM)
+           ========================================== */
         #spanduk-instal {
-            display: none; /* Awalnya disembunyikan */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #0d6efd; /* Warna biru aplikasi */
-            color: white;
-            padding: 15px 20px;
-            box-sizing: border-box;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
-            z-index: 9999;
-            text-align: center;
-            font-family: sans-serif;
+            display: none; position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 20px; border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.5);
+            z-index: 9999; transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        #spanduk-instal p {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: bold;
-        }
+        #spanduk-instal.show { bottom: 20px; }
+        
+        .btn-grup { display: flex; gap: 10px; margin-top: 15px; }
         .tombol-instal {
-            background-color: white;
-            color: #0d6efd;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 10px;
+            flex: 1; background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white;
+            border: none; padding: 12px; border-radius: 12px; font-weight: 800;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3); cursor: pointer;
         }
         .tombol-tutup {
-            background-color: transparent;
-            color: white;
-            border: 1px solid white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+            flex: 1; background: #f1f5f9; color: #475569; border: none;
+            padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer;
         }
     </style>
 </head>
 <body>
     
-    <!-- GANTI DENGAN LINK GOOGLE APPS SCRIPT BAPAK -->
-    <iframe src="https://script.google.com/macros/s/AKfycbwQLwkItAlwZMYjDlQRz-XhRLwd58w7_Pad2qSyDybDFY2XSJiB3gmCGdj290tlNmV3cw/exec"></iframe>
+    <!-- LAYAR PEMUAT -->
+    <div id="splash-screen">
+        <img src="icon.png" alt="Logo RT 18" class="logo-splash">
+        <div class="teks-splash">APLIKASI RT 18</div>
+        <div class="spinner"></div>
+    </div>
 
-    <!-- Kotak Spanduk Instalasi dengan Logo -->
+    <!-- IFRAME GOOGLE APPS SCRIPT -->
+    <!-- onload akan menghilangkan splash screen saat aplikasi Google selesai dimuat -->
+    <iframe id="app-frame" src="https://script.google.com/macros/s/AKfycbwQLwkItAlwZMYjDlQRz-XhRLwd58w7_Pad2qSyDybDFY2XSJiB3gmCGdj290tlNmV3cw/exec" onload="tutupSplashScreen()"></iframe>
+
+    <!-- SPANDUK INSTALASI PREMIUM -->
     <div id="spanduk-instal">
-        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px; text-align: left;">
-            <!-- Memanggil gambar icon.png yang sudah Bapak upload -->
-            <img src="icon.png" alt="Logo Aplikasi" style="width: 50px; height: 50px; border-radius: 10px; margin-right: 15px; background: white; padding: 2px;">
-            
+        <div style="display: flex; align-items: center;">
+            <img src="icon.png" style="width: 45px; height: 45px; border-radius: 12px; margin-right: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <div>
-                <p style="margin: 0; font-size: 16px;"><strong>Aplikasi RT 18</strong></p>
-                <p style="margin: 0; font-size: 12px; font-weight: normal; color: #e9ecef;">Segera Install agar lebih cepat diakses.</p>
+                <h4 style="margin: 0; font-size: 15px; color: #0f172a; font-weight: 800;">Pasang Aplikasi RT 18</h4>
+                <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">Akses layanan warga lebih cepat langsung dari layar HP Anda.</p>
             </div>
         </div>
-
-        <button id="btn-instal" class="tombol-instal">📲 Install Sekarang</button>
-        <button id="btn-tutup" class="tombol-tutup">Nanti Saja</button>
+        <div class="btn-grup">
+            <button id="btn-tutup" class="tombol-tutup">Nanti</button>
+            <button id="btn-instal" class="tombol-instal"><i class="fas fa-download"></i> Install Sekarang</button>
+        </div>
     </div>
 
     <script>
-        // Mendaftarkan PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
+        // 1. Fungsi Menutup Splash Screen
+        function tutupSplashScreen() {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
         }
 
-        // MESIN PENANGKAP INSTALASI
+        // 2. Mendaftarkan Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW Berhasil Didaftarkan!', reg.scope);
+                }).catch(err => {
+                    console.log('SW Gagal:', err);
+                });
+            });
+        }
+
+        // 3. Mesin Penangkap Instalasi PWA
         let penangkapInstal;
         const spanduk = document.getElementById('spanduk-instal');
         const btnInstal = document.getElementById('btn-instal');
         const btnTutup = document.getElementById('btn-tutup');
 
-        // Saat browser mendeteksi aplikasi bisa diinstal
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Tahan pop-up bawaan browser
             e.preventDefault();
-            // Simpan event-nya
             penangkapInstal = e;
-            // Tampilkan spanduk buatan kita
+            // Tampilkan spanduk dengan animasi meluncur ke atas
             spanduk.style.display = 'block';
+            setTimeout(() => { spanduk.classList.add('show'); }, 100);
         });
 
-        // Saat tombol "Install Sekarang" ditekan warga
         btnInstal.addEventListener('click', async () => {
-            // Sembunyikan spanduk kita
-            spanduk.style.display = 'none';
-            // Keluarkan pop-up instalasi asli dari browser
+            spanduk.classList.remove('show');
+            setTimeout(() => { spanduk.style.display = 'none'; }, 500);
+            
             if (penangkapInstal) {
                 penangkapInstal.prompt();
                 const { outcome } = await penangkapInstal.userChoice;
-                // Jika warga setuju install, bersihkan mesinnya
                 if (outcome === 'accepted') {
-                    penangkapInstal = null;
+                    console.log('Warga menginstal aplikasi');
                 }
+                penangkapInstal = null;
             }
         });
 
-        // Jika warga menekan "Nanti Saja"
         btnTutup.addEventListener('click', () => {
-            spanduk.style.display = 'none';
+            spanduk.classList.remove('show');
+            setTimeout(() => { spanduk.style.display = 'none'; }, 500);
         });
 
-        // Jika aplikasi sudah berhasil terinstal, sembunyikan spanduk selamanya
         window.addEventListener('appinstalled', () => {
+            spanduk.classList.remove('show');
             spanduk.style.display = 'none';
-            penangkapInstal = null;
         });
     </script>
 </body>
