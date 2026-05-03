@@ -103,13 +103,20 @@
         </div>
     </div>
 
-    <script>
-        // 1. Fungsi Menutup Splash Screen
+   <script>
+        // 1. Fungsi Menutup Splash Screen (Diperkuat Anti-Macet!)
         function tutupSplashScreen() {
             const splash = document.getElementById('splash-screen');
-            splash.style.opacity = '0';
-            setTimeout(() => { splash.style.visibility = 'hidden'; }, 500);
+            if(splash) {
+                splash.style.opacity = '0';
+                splash.style.pointerEvents = 'none'; // KUNCI UTAMA: Mematikan fisik halangannya
+                setTimeout(() => { splash.style.display = 'none'; }, 500); // Dihancurkan sepenuhnya dari layar
+            }
         }
+
+        // JARING PENGAMAN: Tutup paksa loading setelah 4 detik 
+        // (Berjaga-jaga jika sinyal HP warga sedang lambat dan iframe gagal merespon onload)
+        setTimeout(() => { tutupSplashScreen(); }, 4000);
 
         // 2. Mendaftarkan Service Worker
         if ('serviceWorker' in navigator) {
